@@ -1,4 +1,11 @@
 Flask
 flask_socketio
 flask_cors
+google-generativeai
+ipython
+python-dotenv
+sentence_transformers
+tika
+pinecone-client
+uuid
 Gunicorn
