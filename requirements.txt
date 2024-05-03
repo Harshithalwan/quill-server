@@ -1,2 +1,4 @@
 Flask
+flask_socketio
+flask_cors
 Gunicorn
