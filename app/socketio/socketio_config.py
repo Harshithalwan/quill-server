@@ -8,12 +8,20 @@ import google.generativeai as genai
 import os
 from IPython.display import display
 from IPython.display import Markdown
-
+from sentence_transformers import SentenceTransformer
+from pinecone import Pinecone, ServerlessSpec
 
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=gemini_api_key)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-1.5-pro-latest', 
+                              system_instruction=["Respond from the give context of the chat, ask follow up questions if needed.", 
+                                                  "Give concise response", 
+                                                  "respond with plane text like you're chatting with a person, don't use markdown, you can use bullet points if needed"])
+
+pinecone_api_key = os.getenv('PINECONE_API_KEY')
+pc = Pinecone(api_key=pinecone_api_key)
+
 chatSessions = {}
 # Define Socket.IO event handlers
 def to_markdown(text):
@@ -34,8 +42,24 @@ def handle_chat_message(message):
     print('Received message:', message)
     session_id = request.sid
     chat = chatSessions[session_id]
-    response = chat.send_message(message, stream=True)
+    contextResponse = getSementicMatches(message['userMessage'], message['ids'])
+    # chat.send_message(' '.join(contextResponse))
+    response = chat.send_message("Context: {context}, Question: {question}".format(context=' '.join(contextResponse), question=message['userMessage']), stream=True)
     # response = model.generate_content(message, stream=True)
     for chunk in response:
-        # print(chunk.text)
         emit('message', chunk.text, to=session_id)   
+
+
+def getSementicMatches(text, ids):
+    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+    questionVector = model.encode(text).tolist()
+    index = pc.Index("documents")
+    contextResponse = index.query(
+        vector=questionVector,
+        filter={"documentId": {"$in": ids}},
+        namespace="ns1", top_k=5,
+        include_metadata=True)
+    response = []
+    for match in contextResponse['matches']:
+        response.append(match['metadata']['text'])
+    return response
