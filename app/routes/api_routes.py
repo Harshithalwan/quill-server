@@ -10,6 +10,7 @@ from pinecone import Pinecone
 from dotenv import load_dotenv
 load_dotenv()
 pinecone_api_key = os.getenv('PINECONE_API_KEY')
+HUGGING_FACE_API_KEY = os.getenv('HUGGING_FACE_API_KEY')
 
 pc = Pinecone(api_key=pinecone_api_key)
 filesDir = "./files/"
@@ -42,7 +43,7 @@ def remove_extra_spaces_1(text):
   return ' '.join(text.split())
 
 def createEmbedding(text):
-    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+    model = SentenceTransformer("maidalun1020/bce-embedding-base_v1", token=HUGGING_FACE_API_KEY)
     chunks = break_chunks(text)
     
     embeddedMap = []
