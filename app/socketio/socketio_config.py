@@ -17,7 +17,7 @@ gemini_api_key = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-1.5-pro-latest', 
                               system_instruction=["Respond from the give context of the chat, ask follow up questions if needed.", 
-                                                  "If context seems unrelated to question, respond with 'No relevant context found'.",
+                                                  "If context seems unrelated to question, respond with 'No relevant context found'",
                                                   "Give concise response", 
                                                   "respond with plane text like you're chatting with a person, don't use markdown, you can use bullet points if needed"])
 
@@ -52,21 +52,27 @@ def handle_chat_message(message):
         emit('message', chunk.text, to=session_id)   
 
 
-HUGGING_FACE_API_KEY = os.getenv('GEMINI_API_KEY')
+HUGGING_FACE_API_KEY = os.getenv('HUGGING_FACE_API_KEY')
 API_URL = "https://api-inference.huggingface.co/models/maidalun1020/bce-embedding-base_v1"
 headers = {"Authorization": f"Bearer {HUGGING_FACE_API_KEY}"}
 def getVector(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
+    vectorResponse = requests.post(API_URL, headers=headers, json=payload)
+    print(vectorResponse)
+    return vectorResponse.json()
 
 
 def getSementicMatches(text, ids):
     # model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
     # questionVector = model.encode(text).tolist()
+    # try:
+        
+    # except:
+    #     print("Error in creating embeddings")
+    #     raise Exception("Error: can't create embeddings")
     questionVector = getVector({
-        "inputs": text,
-        })
-    print(questionVector)
+            "inputs": text,
+            })
+    # print(questionVector)
     index = pc.Index("documents")
     contextResponse = index.query(
         vector=questionVector,
