@@ -52,7 +52,7 @@ def handle_chat_message(message):
             emit('message', chunk.text, to=session_id)
     except Exception as e:
         print(e)
-        emit('message', "Error occured!, please be patient and try again. If it still doesn't work reach out to @ Harshithalwan@gmail.com.", to=session_id)   
+        emit('message', "Error occured!, please be patient and try again. If it still doesn't work reach out to @ Harshithalwan@gmail.com", to=session_id)   
 
 
 HUGGING_FACE_API_KEY = os.getenv('HUGGING_FACE_API_KEY')
